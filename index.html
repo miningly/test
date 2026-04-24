@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>电影时光 - iOS风格电影App</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+    <div class="ios-device">
+
+        <!-- ===== 状态栏 ===== -->
+        <div class="status-bar">
+            <div class="time">9:41</div>
+            <div class="status-icons">
+                <span class="signal">📶</span>
+                <span class="wifi">Wi-Fi</span>
+                <span class="battery">100%</span>
+            </div>
+        </div>
+
+        <!-- ===== 页面容器 ===== -->
+        <div class="page-container">
+
+            <!-- ======== 首页 (homePage) ======== -->
+            <div class="page active" id="homePage">
+                <header class="nav-bar">
+                    <h1 class="app-title">电影时光</h1>
+                    <div class="user-avatar" id="avatarBtn">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </header>
+
+                <div class="page-scroll">
+                    <!-- 搜索栏 -->
+                    <div class="search-section" id="homeSearchBar">
+                        <div class="search-bar">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input" placeholder="搜索电影、演员、导演..." readonly>
+                        </div>
+                    </div>
+
+                    <!-- 推荐横幅 -->
+                    <section class="banner-section">
+                        <div class="banner">
+                            <div class="banner-content">
+                                <h2 class="banner-title">本周热映</h2>
+                                <p class="banner-subtitle">《星际穿越》重映特别版</p>
+                                <button class="banner-button">立即观看</button>
+                            </div>
+                            <div class="banner-overlay"></div>
+                        </div>
+                    </section>
+
+                    <!-- 分类浏览 -->
+                    <section class="categories-section">
+                        <h3 class="section-title">分类浏览</h3>
+                        <div class="categories-grid" id="homeCategories"></div>
+                    </section>
+
+                    <!-- 热门电影 -->
+                    <section class="popular-section">
+                        <div class="section-header">
+                            <h3 class="section-title">热门电影</h3>
+                            <a href="#" class="view-all" id="viewAllBtn">查看全部</a>
+                        </div>
+                        <div class="movies-scroll" id="homePopularMovies"></div>
+                    </section>
+
+                    <!-- 正在热映 -->
+                    <section class="now-playing">
+                        <h3 class="section-title">正在热映</h3>
+                        <div class="now-playing-list" id="homeNowPlaying"></div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- ======== 搜索页 (searchPage) ======== -->
+            <div class="page" id="searchPage">
+                <header class="nav-bar sub-nav">
+                    <button class="back-btn" data-page="searchPage">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h1 class="nav-title">搜索</h1>
+                    <div style="width:40px;"></div>
+                </header>
+                <div class="page-scroll">
+                    <div class="search-section">
+                        <div class="search-bar search-page-bar">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input search-page-input" placeholder="输入电影名称...">
+                            <button class="search-clear-btn" id="searchClearBtn"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- 热门搜索 -->
+                    <div class="search-hot" id="searchHotSection">
+                        <h3 class="section-title">热门搜索</h3>
+                        <div class="hot-tags" id="hotTags"></div>
+                    </div>
+
+                    <!-- 搜索历史 -->
+                    <div class="search-history" id="searchHistorySection">
+                        <div class="section-header">
+                            <h3 class="section-title">搜索历史</h3>
+                            <a href="#" class="view-all" id="clearHistoryBtn">清空</a>
+                        </div>
+                        <div class="history-list" id="historyList"></div>
+                    </div>
+
+                    <!-- 搜索建议 -->
+                    <div class="search-suggestions" id="searchSuggestions" style="display:none;">
+                        <h3 class="section-title">搜索建议</h3>
+                        <div class="suggestions-list" id="suggestionsList"></div>
+                    </div>
+
+                    <!-- 搜索结果 -->
+                    <div class="search-results" id="searchResults" style="display:none;">
+                        <div class="section-header">
+                            <h3 class="section-title">搜索结果</h3>
+                            <span class="result-count" id="resultCount"></span>
+                        </div>
+                        <div class="search-filters" id="searchFilters">
+                            <button class="filter-btn active" data-filter="all">全部</button>
+                            <button class="filter-btn" data-filter="科幻">科幻</button>
+                            <button class="filter-btn" data-filter="动作">动作</button>
+                            <button class="filter-btn" data-filter="喜剧">喜剧</button>
+                            <button class="filter-btn" data-filter="爱情">爱情</button>
+                            <button class="filter-btn" data-filter="动画">动画</button>
+                        </div>
+                        <div class="search-grid" id="searchGrid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======== 收藏页 (favoritesPage) ======== -->
+            <div class="page" id="favoritesPage">
+                <header class="nav-bar sub-nav">
+                    <button class="back-btn" data-page="favoritesPage">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h1 class="nav-title">我的收藏</h1>
+                    <button class="edit-btn" id="editFavBtn">编辑</button>
+                </header>
+                <div class="page-scroll">
+                    <div class="favorites-empty" id="favoritesEmpty">
+                        <i class="fas fa-heart"></i>
+                        <p>还没有收藏电影</p>
+                        <span>去首页发现喜欢的电影吧</span>
+                    </div>
+                    <div class="favorites-list" id="favoritesList"></div>
+                </div>
+            </div>
+
+            <!-- ======== 个人中心页 (profilePage) ======== -->
+            <div class="page" id="profilePage">
+                <header class="nav-bar sub-nav">
+                    <button class="back-btn" data-page="profilePage">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h1 class="nav-title">个人中心</h1>
+                    <button class="settings-btn"><i class="fas fa-cog"></i></button>
+                </header>
+                <div class="page-scroll">
+                    <!-- 用户信息 -->
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h2 class="profile-name">电影爱好者</h2>
+                        <div class="profile-badge">
+                            <i class="fas fa-crown"></i>
+                            <span>黄金会员</span>
+                        </div>
+                    </div>
+
+                    <!-- 统计数据 -->
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="statFavCount">0</span>
+                            <span class="stat-label">收藏</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="statWatchedCount">0</span>
+                            <span class="stat-label">已看</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="statHoursCount">0</span>
+                            <span class="stat-label">小时</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="statReviewCount">0</span>
+                            <span class="stat-label">评价</span>
+                        </div>
+                    </div>
+
+                    <!-- 功能入口 -->
+                    <div class="profile-menu">
+                        <div class="menu-item" id="gotoHistory">
+                            <div class="menu-icon" style="background:#007aff;"><i class="fas fa-clock"></i></div>
+                            <div class="menu-text">
+                                <span>观看历史</span>
+                                <small>最近观看记录</small>
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item" id="gotoReviews">
+                            <div class="menu-icon" style="background:#ff9500;"><i class="fas fa-star"></i></div>
+                            <div class="menu-text">
+                                <span>我的评价</span>
+                                <small>你写过的影评</small>
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-icon" style="background:#34c759;"><i class="fas fa-download"></i></div>
+                            <div class="menu-text">
+                                <span>离线缓存</span>
+                                <small>已缓存 0 部电影</small>
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-icon" style="background:#af52de;"><i class="fas fa-ticket-alt"></i></div>
+                            <div class="menu-text">
+                                <span>我的影票</span>
+                                <small>查看购票记录</small>
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-icon" style="background:#ff3b30;"><i class="fas fa-heart"></i></div>
+                            <div class="menu-text">
+                                <span>喜好设置</span>
+                                <small>管理你的观影偏好</small>
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-icon" style="background:#8e8e93;"><i class="fas fa-info-circle"></i></div>
+                            <div class="menu-text">
+                                <span>关于</span>
+                                <small>版本 1.0.0</small>
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- 退出按钮 -->
+                    <button class="logout-btn">退出登录</button>
+                </div>
+            </div>
+
+            <!-- ======== 播放页 (playerPage) ======== -->
+            <div class="page" id="playerPage">
+                <div class="player-container">
+                    <!-- 播放器头部 -->
+                    <div class="player-topbar">
+                        <button class="back-btn" data-page="playerPage">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span class="player-title">正在播放</span>
+                        <button class="player-more"><i class="fas fa-ellipsis-v"></i></button>
+                    </div>
+
+                    <!-- 视频播放区域 -->
+                    <div class="video-area" id="videoArea">
+                        <div class="video-placeholder" id="videoPlaceholder">
+                            <i class="fas fa-play-circle" id="videoPlayBtn"></i>
+                            <span class="video-hint">点击播放</span>
+                        </div>
+                        <div class="video-controls" id="videoControls">
+                            <div class="controls-top">
+                                <span class="control-title" id="playerMovieTitle">电影名称</span>
+                            </div>
+                            <div class="controls-bottom">
+                                <div class="progress-bar" id="progressBar">
+                                    <div class="progress-track">
+                                        <div class="progress-fill" id="progressFill" style="width:0%;"></div>
+                                        <div class="progress-thumb" id="progressThumb" style="left:0%;"></div>
+                                    </div>
+                                    <div class="progress-time">
+                                        <span id="currentTime">00:00</span>
+                                        <span id="totalTime">00:00</span>
+                                    </div>
+                                </div>
+                                <div class="controls-buttons">
+                                    <button id="playPauseBtn"><i class="fas fa-play"></i></button>
+                                    <button id="rewindBtn"><i class="fas fa-undo"></i></button>
+                                    <button id="forwardBtn"><i class="fas fa-redo"></i></button>
+                                    <button id="volumeBtn"><i class="fas fa-volume-up"></i></button>
+                                    <button id="fullscreenBtn"><i class="fas fa-expand"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="video-overlay" id="videoOverlay"></div>
+                    </div>
+
+                    <!-- 播放页底部信息 -->
+                    <div class="page-scroll player-info">
+                        <h3 id="playerInfoTitle">电影名称</h3>
+                        <div class="player-rating">
+                            <span id="playerInfoRating">8.7</span>
+                            <span class="player-year" id="playerInfoYear">2024</span>
+                            <span class="player-genre" id="playerInfoGenre">科幻</span>
+                        </div>
+                        <p class="player-desc" id="playerInfoDesc">电影简介</p>
+                        <h4 class="player-like-title">猜你喜欢</h4>
+                        <div class="player-like-list" id="playerLikeList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======== 分类浏览页 (categoryPage) ======== -->
+            <div class="page" id="categoryPage">
+                <header class="nav-bar sub-nav">
+                    <button class="back-btn" data-page="categoryPage">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h1 class="nav-title" id="categoryPageTitle">分类浏览</h1>
+                    <button class="sort-btn" id="categorySortBtn"><i class="fas fa-sort"></i></button>
+                </header>
+                <div class="page-scroll">
+                    <div class="category-filter" id="categoryFilter"></div>
+                    <div class="category-grid" id="categoryGrid"></div>
+                </div>
+            </div>
+
+            <!-- ======== 全部电影页 (viewAllPage) ======== -->
+            <div class="page" id="viewAllPage">
+                <header class="nav-bar sub-nav">
+                    <button class="back-btn" data-page="viewAllPage">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h1 class="nav-title">全部电影</h1>
+                    <button class="sort-btn" id="allSortBtn"><i class="fas fa-sort"></i></button>
+                </header>
+                <div class="page-scroll">
+                    <div class="viewall-grid" id="viewAllGrid"></div>
+                    <div class="load-more" id="loadMoreIndicator">
+                        <span>上拉加载更多</span>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /page-container -->
+
+        <!-- ===== 底部标签栏 ===== -->
+        <nav class="tab-bar" id="tabBar">
+            <div class="tab-item active" data-tab="homePage">
+                <i class="fas fa-home"></i>
+                <span>首页</span>
+            </div>
+            <div class="tab-item" data-tab="searchPage">
+                <i class="fas fa-search"></i>
+                <span>搜索</span>
+            </div>
+            <div class="tab-item" data-tab="favoritesPage">
+                <i class="fas fa-heart"></i>
+                <span>收藏</span>
+                <span class="tab-badge" id="favBadge" style="display:none;">0</span>
+            </div>
+            <div class="tab-item" data-tab="profilePage">
+                <i class="fas fa-user"></i>
+                <span>我的</span>
+            </div>
+        </nav>
+
+        <!-- ===== 电影详情弹窗 ===== -->
+        <div class="movie-modal" id="movieModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="close-modal">&times;</button>
+                    <h2>电影详情</h2>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-poster" id="modalPoster"></div>
+                    <div class="modal-info">
+                        <h3 id="modalTitle">电影名称</h3>
+                        <div class="modal-rating">
+                            <div class="stars" id="modalStars"></div>
+                        </div>
+                        <div class="modal-meta" id="modalMeta"></div>
+                        <div class="modal-cast" id="modalCast"></div>
+                        <p class="modal-desc" id="modalDesc">电影简介</p>
+                        <div class="modal-actions">
+                            <button class="play-btn" id="modalPlayBtn"><i class="fas fa-play"></i> 立即播放</button>
+                            <button class="favorite-btn" id="modalFavBtn"><i class="fas fa-heart"></i> 加入收藏</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /ios-device -->
+
+    <script src="script.js"></script>
+</body>
+</html>
