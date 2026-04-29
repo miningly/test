@@ -67,35 +67,75 @@ function switchPage(pageId, direction) {
     if (!next || current === next) return;
 
     currentPage = pageId;
+    const dir = direction || 1;
 
-    // 方向: 1=左进, -1=右进
-    const dir = direction || (pageId === 'homePage' || pageId === 'searchPage' || pageId === 'favoritesPage' || pageId === 'profilePage' ? 1 : -1);
+    // 清除所有页面上的动画相关class
+    document.querySelectorAll('.page').forEach(p => {
+        p.classList.remove('anim-enter', 'anim-exit', 'anim-under');
+    });
 
-    // 移除旧页面
-    current.classList.remove('active');
-    current.classList.add(dir > 0 ? 'exit-left' : 'exit-right');
+    if (dir > 0) {
+        // === 正向切换（首页→子页）：新页从右侧滑入覆盖旧页 ===
+        // 新页初始定位在右侧30px
+        next.classList.add('anim-enter');
+        void next.offsetHeight; // 强制重排
+        // 滑入到原位
+        next.classList.remove('anim-enter');
+        next.classList.add('active');
 
-    // 准备新页面
-    next.classList.remove('exit-left', 'exit-right');
-    // 强制重排
-    void next.offsetWidth;
-    next.classList.add('active');
+        // 旧页保持原位不动，但降低z-index被新页覆盖
+        current.classList.remove('active');
+        current.classList.add('anim-under');
 
-    // 清除旧page的退出类
-    setTimeout(() => {
-        current.classList.remove('exit-left', 'exit-right');
-    }, 350);
+        setTimeout(() => {
+            current.classList.remove('anim-under');
+        }, 350);
+    } else {
+        // === 反向切换（子页→首页）：当前页滑出到右侧，露出底下页面 ===
+        current.classList.remove('active');
+        current.classList.add('anim-exit');
+        // 底下的目标页面设为可见
+        next.classList.add('anim-under');
 
-    // 更新底部标签
+        setTimeout(() => {
+            current.classList.remove('anim-exit');
+            next.classList.remove('anim-under');
+            next.classList.add('active');
+        }, 320);
+    }
+
     updateTabBar(pageId);
 }
 
 function updateTabBar(pageId) {
     const mainTabs = ['homePage','searchPage','favoritesPage','profilePage'];
-    $$('.tab-item').forEach(t => {
-        t.classList.toggle('active', t.dataset.tab === pageId);
-    });
-    document.getElementById('tabBar').style.display = mainTabs.includes(pageId) ? 'flex' : 'none';
+    // 共享标签栏：只在首页显示，其他页面隐藏
+    document.getElementById('tabBar').style.display = pageId === 'homePage' ? 'flex' : 'none';
+
+    // 各页面专属底面：只显示当前页面对应的底面
+    document.querySelectorAll('.page-bottom-bar').forEach(bar => bar.classList.remove('show'));
+
+    if (pageId === 'searchPage') {
+        document.getElementById('searchBottomBar').classList.add('show');
+    } else if (pageId === 'favoritesPage') {
+        document.getElementById('favBottomBar').classList.add('show');
+        updateFavBottomCount();
+        // 重置编辑模式
+        editMode = false;
+        document.querySelectorAll('.fav-remove-btn').forEach(b => { b.style.display = 'none'; });
+        const editBtn = document.querySelector('#favBottomBar [data-action="favEdit"]');
+        if (editBtn) editBtn.innerHTML = '<i class="fas fa-edit"></i><span>编辑</span>';
+    } else if (pageId === 'profilePage') {
+        document.getElementById('profileBottomBar').classList.add('show');
+    }
+}
+
+function updateFavBottomCount() {
+    const el = document.getElementById('favBottomCount');
+    if (el) {
+        el.textContent = favorites.length;
+        el.style.display = favorites.length ? 'flex' : 'none';
+    }
 }
 
 /* ===================================================================
@@ -511,7 +551,7 @@ function simulateBooking(title) {
    7. 事件绑定
    =================================================================== */
 
-// 底部标签切换
+// 底部标签切换（仅首页可见的共享标签栏）
 $$('.tab-item').forEach(tab => {
     tab.addEventListener('click', function() {
         const target = this.dataset.tab;
@@ -519,19 +559,97 @@ $$('.tab-item').forEach(tab => {
     });
 });
 
-// 所有返回按钮
+// ===== 各页面专属底面按钮事件 =====
+
+// 搜索页底面
+document.querySelector('#searchBottomBar [data-action="searchHot"]').addEventListener('click', function() {
+    const section = document.getElementById('searchHotSection');
+    if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showToast('热门搜索');
+    }
+});
+document.querySelector('#searchBottomBar [data-action="searchFilter"]').addEventListener('click', function() {
+    const input = $('.search-page-input');
+    if (input.value.trim()) {
+        const filters = document.getElementById('searchFilters');
+        filters.style.display = filters.style.display === 'none' ? 'flex' : 'none';
+        showToast(filters.style.display === 'flex' ? '展开筛选' : '收起筛选');
+    } else {
+        showToast('请先搜索后再使用筛选');
+    }
+});
+document.querySelector('#searchBottomBar [data-action="searchHistory"]').addEventListener('click', function() {
+    const section = document.getElementById('searchHistorySection');
+    if (section.style.display !== 'none' && searchHistory.length) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showToast('搜索历史');
+    } else {
+        showToast('暂无搜索历史');
+    }
+});
+document.querySelector('#searchBottomBar [data-action="searchClear"]').addEventListener('click', function() {
+    $('.search-page-input').value = '';
+    document.getElementById('searchClearBtn').style.display = 'none';
+    document.getElementById('searchHotSection').style.display = 'block';
+    document.getElementById('searchHistorySection').style.display = searchHistory.length ? 'block' : 'none';
+    document.getElementById('searchResults').style.display = 'none';
+    document.getElementById('searchSuggestions').style.display = 'none';
+    document.getElementById('searchFilters').style.display = 'none';
+    $('.search-page-input').focus();
+    showToast('已清空');
+});
+
+// 收藏页底面
+document.querySelector('#favBottomBar [data-action="favEdit"]').addEventListener('click', function() {
+    editMode = !editMode;
+    this.innerHTML = editMode ? '<i class="fas fa-check"></i><span>完成</span>' : '<i class="fas fa-edit"></i><span>编辑</span>';
+    document.querySelectorAll('.fav-remove-btn').forEach(b => {
+        b.style.display = editMode ? 'flex' : 'none';
+    });
+    showToast(editMode ? '编辑模式' : '完成编辑');
+});
+document.querySelector('#favBottomBar [data-action="favSort"]').addEventListener('click', function() {
+    sortAsc = !sortAsc;
+    const list = document.getElementById('favoritesList');
+    const items = [...list.querySelectorAll('.fav-card')];
+    if (!items.length) { showToast('暂无收藏'); return; }
+    items.sort((a, b) => {
+        const ra = parseFloat(a.querySelector('.fav-rating').textContent);
+        const rb = parseFloat(b.querySelector('.fav-rating').textContent);
+        return sortAsc ? ra - rb : rb - ra;
+    });
+    list.innerHTML = '';
+    items.forEach(el => list.appendChild(el));
+    // 重新绑定事件
+    list.querySelectorAll('.fav-card').forEach(el => {
+        el.addEventListener('click', function(e) {
+            if (e.target.closest('.fav-remove-btn')) {
+                removeFavorite(Number(this.dataset.id));
+                return;
+            }
+            openMovieModal(Number(this.dataset.id));
+        });
+    });
+    showToast(sortAsc ? '评分升序' : '评分降序');
+});
+
+// 个人中心底面
+document.querySelector('#profileBottomBar [data-action="profileSettings"]').addEventListener('click', () => showToast('设置功能开发中'));
+document.querySelector('#profileBottomBar [data-action="profileMessage"]').addEventListener('click', () => showToast('消息中心暂无新消息'));
+document.querySelector('#profileBottomBar [data-action="profileTheme"]').addEventListener('click', () => showToast('主题切换功能开发中'));
+document.querySelector('#profileBottomBar [data-action="profileAbout"]').addEventListener('click', () => showToast('电影时光 v1.0.0'));
+
+// 所有返回按钮（使用反向动画：当前页滑出到右侧）
 $$('.back-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         const from = this.dataset.page;
-        // 根据当前页面决定返回目标
         if (from === 'playerPage') {
             const movie = moviesData.find(m => m.id === currentMovieId);
             if (movie) openMovieModal(movie.id);
-            switchPage('homePage', 1);
-        } else if (from === 'categoryPage' || from === 'viewAllPage') {
-            switchPage('homePage', 1);
+            switchPage('homePage', -1);
         } else {
-            switchPage('homePage', 1);
+            switchPage('homePage', -1);
         }
     });
 });
@@ -681,15 +799,8 @@ document.getElementById('clearHistoryBtn').addEventListener('click', (e) => {
     showToast('已清空搜索历史');
 });
 
-// 收藏页编辑
+// 收藏页编辑 (底面编辑按钮处理已移至底面事件区域)
 let editMode = false;
-document.getElementById('editFavBtn').addEventListener('click', function() {
-    editMode = !editMode;
-    this.textContent = editMode ? '完成' : '编辑';
-    document.querySelectorAll('.fav-remove-btn').forEach(b => {
-        b.style.display = editMode ? 'flex' : 'none';
-    });
-});
 
 // 分类页排序
 document.getElementById('categorySortBtn').addEventListener('click', function() {
@@ -858,8 +969,6 @@ updateProfileStats();
 
 // 初始显示首页
 document.getElementById('homePage').classList.add('active');
-document.getElementById('homePage').style.transform = 'translateX(0)';
-document.getElementById('homePage').style.opacity = '1';
 
 console.log('%c🎬 电影时光 App 已加载完成!', 'color:#007aff;font-size:16px;font-weight:bold;');
 

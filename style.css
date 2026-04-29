@@ -58,24 +58,44 @@ body {
     display: flex;
     flex-direction: column;
     opacity: 0;
-    transform: translateX(30px);
+    transform: translateX(0);
     pointer-events: none;
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: none;
     z-index: 1;
+    background: #fff;
 }
+#playerPage.page { background: #000; }
+
+/* 活动页面：可见，位于上层 */
 .page.active {
     opacity: 1;
-    transform: translateX(0);
     pointer-events: auto;
-    z-index: 2;
+    z-index: 3;
 }
-.page.exit-left {
-    opacity: 0;
-    transform: translateX(-30px);
-}
-.page.exit-right {
-    opacity: 0;
+
+/* 进入中：从右侧30px开始 */
+.page.anim-enter {
+    opacity: 1;
     transform: translateX(30px);
+    pointer-events: auto;
+    z-index: 4;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 退出中：滑到右侧 */
+.page.anim-exit {
+    opacity: 1;
+    transform: translateX(30px);
+    pointer-events: none;
+    z-index: 4;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 底下垫底的旧页面：保持可见但不可交互 */
+.page.anim-under {
+    opacity: 1;
+    pointer-events: none;
+    z-index: 2;
 }
 
 /* 首页 - 旧的home-screen变为page */
@@ -251,6 +271,55 @@ body {
     font-weight: 600; padding: 0 4px;
 }
 
+/* ===== 各页面专属底面 ===== */
+.page-bottom-bar {
+    height: 72px; border-top: 1px solid #f0f0f0;
+    display: none; align-items: center;
+    flex-shrink: 0; padding: 0 12px 12px;
+    background: #fff; z-index: 100;
+}
+.page-bottom-bar.show { display: flex; }
+
+/* 搜索页底面 */
+#searchBottomBar { justify-content: space-around; }
+
+/* 收藏页底面 */
+#favBottomBar { justify-content: space-between; }
+.bottom-bar-left { display: flex; align-items: center; gap: 8px; padding-left: 8px; }
+.bottom-bar-title-text { font-size: 16px; font-weight: 600; }
+.bottom-bar-count {
+    background: #ff3b30; color: #fff; font-size: 11px;
+    min-width: 18px; height: 18px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; padding: 0 5px;
+}
+.bottom-bar-actions { display: flex; gap: 4px; }
+
+/* 个人中心底面 */
+#profileBottomBar { justify-content: space-around; }
+
+/* 底面按钮通用 */
+.bottom-action-btn {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 3px; background: none; border: none; color: #8e8e93;
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    padding: 6px 14px; border-radius: 10px;
+    transition: all 0.2s; position: relative;
+}
+.bottom-action-btn:hover { background: #f2f2f7; }
+.bottom-action-btn:active { transform: scale(0.95); }
+.bottom-action-btn i { font-size: 20px; }
+.bottom-action-btn span { font-size: 11px; }
+.bottom-action-btn.active { color: #007aff; }
+
+.bottom-badge {
+    position: absolute; top: 2px; right: 6px;
+    background: #ff3b30; color: #fff; font-size: 9px;
+    min-width: 14px; height: 14px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; padding: 0 3px;
+}
+
 /* ===== 电影详情弹窗 ===== */
 .movie-modal {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -375,7 +444,7 @@ body {
     background: none; border: none; color: #ff3b30;
     font-size: 20px; cursor: pointer; padding: 8px;
     border-radius: 50%; width: 40px; height: 40px;
-    display: flex; align-items: center; justify-content: center;
+    display: none; align-items: center; justify-content: center;
 }
 .fav-remove-btn:hover { background: rgba(255,59,48,0.1); }
 
